@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Garden of Fifteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --pink-dark: #4a1530;
+        --text-dark: #3a1024;
+        --text-light: rgba(255, 245, 250, 0.95);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { -webkit-tap-highlight-color: transparent; }
+
+    body {
+        font-family: 'Quicksand', sans-serif;
+        background: #050318;
+        color: var(--text-light);
+        overflow-x: hidden;
+        line-height: 1.6;
+    }
+
+    /* ============ BACKGROUND LAYERS ============ */
+    .bg-container {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .sky-night {
+        position: absolute; inset: 0;
+        background:
+            radial-gradient(ellipse at 80% 15%, rgba(80, 40, 110, 0.45) 0%, transparent 55%),
+            linear-gradient(180deg, #050520 0%, #0f0a30 40%, #2a1548 70%, #4a2860 100%);
+        transition: opacity 1.5s ease;
+    }
+
+    .sky-dawn {
+        position: absolute; inset: 0;
+        background:
+            radial-gradient(ellipse at 50% 30%, rgba(255, 240, 245, 1) 0%, transparent 70%),
+            linear-gradient(180deg, #7a4888 0%, #c87898 35%, #f0b0c8 65%, #ffe0e8 100%);
+        opacity: 0;
+        transition: opacity 1.5s ease;
+    }
+
+    .stars-layer {
+        position: absolute; inset: 0;
+        transition: opacity 1.5s ease;
+    }
+
+    .bg-star {
+        position: absolute;
+        background: #fff;
+        border-radius: 50%;
+        animation: twinkle 4s infinite ease-in-out;
+    }
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.2; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ============ FIREFLIES ============ */
+    .fireflies-container {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 2s ease;
+    }
+    .fireflies-container.active { opacity: 1; }
+
+    .firefly {
+        position: absolute;
+        width: 4px; height: 4px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #fff 20%, #ffe8a0 60%, rgba(255, 220, 150, 0.4) 100%);
+        box-shadow: 0 0 10px rgba(255, 230, 150, 1), 0 0 20px rgba(255, 220, 130, 0.8);
+        opacity: 0;
+        animation: floatUp 10s infinite ease-in-out;
+    }
+    @keyframes floatUp {
+        0% { transform: translateY(0) translateX(0); opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { transform: translateY(-200px) translateX(50px); opacity: 0; }
+    }
+
+    /* ============ MUSIC TOGGLE ============ */
+    .music-toggle {
+        position: fixed;
+        top: 1.5rem; right: 1.5rem;
+        z-index: 100;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 200, 230, 0.4);
+        color: #fff;
+        padding: 0.5rem 1.1rem;
+        border-radius: 30px;
+        font-family: 'Quicksand', sans-serif;
+        font-weight: 500;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+    .music-toggle:hover { background: rgba(255, 255, 255, 0.25); }
+    .music-toggle.on {
+        background: rgba(255, 150, 200, 0.3);
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+    .music-note { font-size: 1rem; line-height: 1; }
+    .music-toggle.on .music-note { animation: noteSpin 3s linear infinite; }
+    @keyframes noteSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* ============ MAIN SCROLL CONTAINER ============ */
+    .scroll-container {
+        position: relative;
+        z-index: 1;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    /* ============ INTRO ============ */
+    .intro-section {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .intro-title {
+        font-family: 'Marck Script', cursive;
+        font-size: 2.8rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 170, 210, 0.8);
+        animation: fadeInDown 1.5s ease;
+    }
+
+    .intro-sub {
+        font-size: 1rem;
+        line-height: 1.9;
+        color: rgba(255, 235, 245, 0.9);
+        margin-bottom: 3rem;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+        animation: fadeInUp 1.5s ease;
+    }
+
+    .intro-hint {
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        text-transform: lowercase;
+        color: rgba(255, 220, 240, 0.7);
+        animation: pulseHint 2.5s infinite ease-in-out;
+    }
+
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* ============ SEED SECTIONS ============ */
+    .seed-section {
+        min-height: 55vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 10vh;
+        position: relative;
+    }
+
+    .seed-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .seed {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #fff 0%, #ffc8dc 40%, #d878a0 100%);
+        box-shadow: 0 0 15px rgba(255, 200, 220, 0.9), 0 0 30px rgba(255, 150, 200, 0.6);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation: seedPulse 2s infinite ease-in-out;
+    }
+    .seed:hover { transform: scale(1.4); }
+    
+    @keyframes seedPulse {
+        0%, 100% { box-shadow: 0 0 15px rgba(255, 200, 220, 0.9), 0 0 30px rgba(255, 150, 200, 0.6); transform: scale(1); }
+        50% { box-shadow: 0 0 25px rgba(255, 230, 240, 1), 0 0 50px rgba(255, 150, 200, 0.9); transform: scale(1.1); }
+    }
+
+    .plant-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .seed-section.planted .seed-wrapper { pointer-events: none; }
+    .seed-section.planted .seed {
+        animation: seedPop 0.5s ease forwards;
+    }
+    @keyframes seedPop {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(2); opacity: 0.8; }
+        100% { transform: scale(0); opacity: 0; }
+    }
+
+    .seed-section.planted .plant-area {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition-delay: 0.3s;
+    }
+
+    .flower-container {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
+
+    .stem {
+        position: absolute;
+        bottom: 0;
+        width: 2px;
+        height: 0;
+        background: linear-gradient(to top, #1a3010 0%, #3a6020 60%, #4a7c2e 100%);
+        border-radius: 2px;
+        transition: height 1s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    .seed-section.planted .stem { height: 70px; transition-delay: 0.4s; }
+
+    .bloom {
+        position: absolute;
+        bottom: 60px;
+        width: 50px;
+        height: 50px;
+        transform: scale(0);
+        transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .seed-section.planted .bloom { transform: scale(1); transition-delay: 0.9s; }
+
+    .petal {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 16px; height: 16px;
+        margin: -8px 0 0 -8px;
+        border-radius: 50%;
+        transform-origin: center;
+        box-shadow: inset 0 -1px 3px rgba(0,0,0,0.1);
+    }
+
+    .bloom-center {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 12px; height: 12px;
+        margin: -6px 0 0 -6px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 40% 40%, #fffbe8, #ffd6a0);
+        box-shadow: 0 0 10px rgba(255,220,150,0.8);
+        z-index: 2;
+    }
+
+    .message-text {
+        text-align: center;
+        font-size: 0.95rem;
+        line-height: 1.9;
+        color: var(--text-light);
+        max-width: 480px;
+        padding: 0 1rem;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 170, 210, 0.3);
+        transition: opacity 1s ease;
+    }
+
+    /* ============ THE GRAND FINALE GARDEN ============ */
+    .finale-section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 4rem 1.5rem;
+        position: relative;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 2s ease;
+    }
+    .finale-section.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .finale-garden {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        max-width: 400px;
+        margin-bottom: 2rem;
+    }
+    
+    .finale-flower {
+        width: 30px;
+        height: 30px;
+        position: relative;
+        animation: sway 4s infinite ease-in-out;
+    }
+    .finale-flower:nth-child(even) { animation-delay: 1s; }
+    @keyframes sway {
+        0%, 100% { transform: rotate(-5deg); }
+        50% { transform: rotate(5deg); }
+    }
+    .finale-flower .bloom {
+        transform: scale(0.5);
+        bottom: 0;
+    }
+
+    .finale-title {
+        font-family: 'Marck Script', cursive;
+        font-size: 2.4rem;
+        color: #fff;
+        margin-bottom: 0.8rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 170, 210, 0.9);
+    }
+
+    .finale-note {
+        font-size: 0.95rem;
+        color: var(--pink-dark);
+        font-weight: 600;
+        margin-bottom: 4rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* ============ THE MOON INTERACTION ============ */
+    .moon-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 5rem;
+        cursor: pointer;
+    }
+    .moon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #fff8f0 0%, #ffe8d8 40%, #ffd0c8 100%);
+        box-shadow: 0 0 30px rgba(255,240,220,0.6), 0 0 60px rgba(255,220,200,0.4);
+        transition: all 1s ease;
+    }
+    .moon-container.dimmed .moon {
+        box-shadow: 0 0 10px rgba(255,240,220,0.2);
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+    .connected-text {
+        margin-top: 1.2rem;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        color: #2e6b3a;
+        opacity: 0;
+        transition: opacity 1.5s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        text-transform: lowercase;
+    }
+    .moon-container.dimmed .connected-text { opacity: 1; }
+    .connected-text::before {
+        content: '';
+        display: inline-block;
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: #4caf50;
+        box-shadow: 0 0 8px #4caf50;
+        animation: pulseHint 1.5s infinite;
+    }
+
+    /* ============ FLOATING LETTER ============ */
+    .letter-section {
+        width: 100%;
+        max-width: 480px;
+        text-align: left;
+        padding-bottom: 6rem;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 2s ease, transform 2s ease;
+    }
+    .finale-section.show .letter-section {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 1s;
+    }
+
+    .letter-section p {
+        font-size: 1rem;
+        line-height: 2.1;
+        color: var(--text-dark);
+        margin-bottom: 1.6rem;
+        font-weight: 500;
+    }
+
+    .letter-section p.letter-title {
+        font-family: 'Marck Script', cursive;
+        font-size: 1.9rem;
+        line-height: 1.4;
+        color: var(--pink-dark);
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .letter-section p.letter-final {
+        font-family: 'Marck Script', cursive;
+        font-size: 1.6rem;
+        line-height: 1.5;
+        color: var(--pink-dark);
+        text-align: center;
+        margin-top: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .letter-section .signoff {
+        text-align: right;
+        font-family: 'Marck Script', cursive;
+        font-size: 1.5rem;
+        color: var(--pink-dark);
+        margin-top: 2rem;
+    }
+
+    .heart-shape {
+        display: inline-block;
+        width: 12px; height: 12px;
+        position: relative;
+        transform: rotate(-45deg);
+        background: #e53935;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+    .heart-shape::before, .heart-shape::after {
+        content: '';
+        position: absolute;
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        background: #e53935;
+    }
+    .heart-shape::before { top: -50%; left: 0; }
+    .heart-shape::after { top: 0; left: 50%; }
+
+    /* ============ PETAL TRAIL ============ */
+    .falling-petal {
+        position: fixed;
+        pointer-events: none;
+        z-index: 999;
+        border-radius: 50% 0 50% 50%;
+        animation: petalFall 2s ease-out forwards;
+        transform-origin: center;
+    }
+    @keyframes petalFall {
+        0% { opacity: 0.9; transform: translate(-50%, -50%) rotate(0deg) translateY(0); }
+        100% { opacity: 0; transform: translate(-50%, -50%) rotate(180deg) translateY(40px); }
+    }
+
+    @media (max-width: 600px) {
+        .intro-title { font-size: 2.2rem; }
+        .seed-section { min-height: 65vh; }
+        .letter-section p { font-size: 0.95rem; line-height: 2; }
+        .letter-section p.letter-title { font-size: 1.6rem; }
+        .letter-section p.letter-final { font-size: 1.4rem; }
+        .music-toggle { top: 1rem; right: 1rem; font-size: 0.65rem; padding: 0.4rem 0.9rem; }
+    }
+</style>
+</head>
+<body>
+
+<audio id="bgAudio" src="song15.mp3" loop preload="auto"></audio>
+
+<div class="bg-container">
+    <div class="sky-night" id="skyNight"></div>
+    <div class="sky-dawn" id="skyDawn"></div>
+    <div class="stars-layer" id="starsLayer"></div>
+</div>
+
+<div class="fireflies-container" id="firefliesContainer"></div>
+
+<button class="music-toggle" id="musicToggle" onclick="toggleMusic()">
+    <span class="music-note">♪</span>
+    <span id="musicLabel">music</span>
+</button>
+
+<div class="scroll-container">
+
+    <div class="intro-section">
+        <h1 class="intro-title">Meroo mutuu</h1>
+        <p class="intro-sub">Fifteen months. I have been holding that number in my hands, trying to make it feel real.</p>
+        <div class="intro-hint">scroll down to plant our first month</div>
+    </div>
+
+    <div id="seedsContainer"></div>
+
+    <!-- FINALE -->
+    <div class="finale-section" id="finaleSection">
+        
+        <div class="finale-garden" id="finaleGarden"></div>
+        
+        <h2 class="finale-title">Everything we have grown</h2>
+        <p class="finale-note">These fifteen flowers represent our 15 months together.</p>
+
+        <!-- Moon Interaction -->
+        <div class="moon-container" id="moonContainer" onclick="dimMoon()">
+            <div class="moon"></div>
+            <div class="connected-text">still connected</div>
+        </div>
+
+        <!-- Elegant Floating Letter -->
+        <div class="letter-section">
+            <p class="letter-title">Meroo mutuu, meroo pukuuu, my sweet girl</p>
+
+            <p>I have tried to write this properly more times than you will ever know. Every version felt too small. You cannot fit a person into paragraphs. You cannot fit what they do to your life into sentences.</p>
+
+            <p>So I will just say it plainly.</p>
+
+            <p>You are the best thing that has happened to me. Not the loudest thing. Not the most dramatic. The best. The one that quietly rearranged everything and made it better.</p>
+
+            <p>I do not know what the next year looks like. I do not know how many calls, how many voice notes, how many nights we fall asleep with the phone still on. I do not know when the distance finally closes. What I do know is that none of that changes how I feel about you. Not the miles. Not the waiting. Not the days where everything feels too heavy.</p>
+
+            <p>You are the person I want to tell everything to. The first one I think of. The last one I think of. The one I want to build a boring, ordinary, beautiful life with.</p>
+
+            <p>So here is my promise. Not a grand one. Just an honest one.</p>
+
+            <p>There is no choosing with you. You are already mine, and I am already yours. On the good days and the quiet ones. When you are bright and laughing and when you are tired and barely forming sentences. I will keep showing up. I will keep listening. I will keep loving you in every way I know how, and then I will learn new ways.</p>
+
+            <p>Fifteen months down. A lifetime left.</p>
+
+            <p class="letter-final">Happy monthiversary, my pukuuu.<br>I love you more than yesterday and less than tomorrow.</p>
+
+            <p class="signoff">Yours, always<span class="heart-shape"></span></p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ============ AUDIO ============ */
+const audio = document.getElementById('bgAudio');
+const musicToggle = document.getElementById('musicToggle');
+const musicLabel = document.getElementById('musicLabel');
+let musicOn = false;
+
+function toggleMusic() {
+    if (!musicOn) {
+        audio.volume = 0.45;
+        audio.play().then(() => { musicOn = true; updateUI(); })
+                    .catch(() => { musicOn = false; updateUI(); });
+    } else {
+        audio.pause();
+        musicOn = false;
+        updateUI();
+    }
+}
+function updateUI() {
+    if (musicOn) {
+        musicToggle.classList.add('on');
+        musicLabel.textContent = 'playing';
+    } else {
+        musicToggle.classList.remove('on');
+        musicLabel.textContent = 'music';
+    }
+}
+
+/* ============ STAR GENERATION ============ */
+const starsLayer = document.getElementById('starsLayer');
+for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'bg-star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    const size = Math.random() * 2 + 1;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    s.style.animationDelay = Math.random() * 3 + 's';
+    starsLayer.appendChild(s);
+}
+
+/* ============ FIREFLIES ============ */
+const firefliesContainer = document.getElementById('firefliesContainer');
+function spawnFireflies(count) {
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const f = document.createElement('div');
+            f.className = 'firefly';
+            f.style.left = (Math.random() * 100) + '%';
+            f.style.top = (50 + Math.random() * 40) + '%';
+            f.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            f.style.animationDelay = (Math.random() * 3) + 's';
+            firefliesContainer.appendChild(f);
+        }, i * 150);
+    }
+}
+
+/* ============ SEED MESSAGES ============ */
+const seedMessages = [
+    "Fifteen I keep saying it out loud like a word I am learning to pronounce fifteen months of you it should feel like a long time and somehow it feels like I blinked maybe that is what loving you does to a person it folds time. It makes a year feel like an afternoon and an afternoon feel like a whole season. I used to measure my life in big things. Now I measure it in the sound of your voice and the way you call me babee when you are half asleep.",
+    "There is a specific way you call me when you are happy. It is different from the way you say it when you are tired, or when you are pretending to be annoyed with me. I have learned all of them. I could pick your voice out of a crowd of a thousand people and I would not even need to turn around. Nobody told me that loving someone would make me study them like this, like every small detail of you is something worth memorising for an exam I will never finish taking.",
+    "The miles between us have a personality of their own. Some nights they are quiet and easy and I barely notice them. Other nights they sit on my chest and refuse to move. What I have learned is that distance is only loud when I forget you are real. And then you send me voice notes and the miles shrink back into what they actually are. Just numbers. Just geography. Nothing that has ever once been able to touch what we have.",
+    "Your laugh through a phone should not be able to fix a whole day, and yet it does. I have had evenings where everything felt heavy and pointless, and then you laughed at something stupid I said, and the weight just lifted. I do not think you know you do that. I do not think you understand that somewhere far away, a boy is sitting in his room smiling at nothing because you found something funny. That is the strangest kind of magic. Something so small travelling so far and still landing exactly where it needs to.",
+    "People think silence means something is wrong. With us it never has. There are nights we just sit there, not saying anything, both of us present. It is the most comfortable quiet I have ever known. I do not have to perform for you. I do not have to be interesting or funny or okay. I can just exist, and you exist back, and somehow that is a conversation. I never understood why people are afraid of silence until I realised they have never sat in one with someone who actually knows them.",
+    "Nothing happened today. I woke up, I ate, I thought about you, I talked with yuuu for hours and I went to sleep. And somehow it was one of the best days of my life. That is the thing nobody warns you about. The big moments are easy to love. Anyone can be in love on the good days. What I did not expect was that loving could be this essy on the days where nothing happens at all. The boring days. The days where the highlight is a 60 minute phone call. Those are the days I realised this is not just romance. This is my life.",
+    "Your voice goes soft and slow when you are tired, and I have come to love that version of you the most. Not the version that is bright and energetic and performing. The one that is half asleep, barely forming sentences, still trying to tell me something. You do not have to be at your best with me. You do not have to be anything at all. I have never wanted the polished version of you. I wanted this one, the one that yawns in the middle of a sentence and forgets what she was saying.",
+    "You worry about me more than you admit. I notice it in the small questions, the ones you ask casually like they mean nothing. Did you eat. Are you sleeping. Are you okay. You say them so lightly that anyone else would miss what is underneath. I do not miss it. I never have. There is a whole language in the way you care, and I have spent fifteen months learning to read it. You love me in questions. I hear every single one of them. And I answer them honestly, mostly because you would know if I did not.",
+    "We have never been good at fighting, and I think that is a gift. When something goes wrong between us, we both go quiet, not to punish each other, just to think. And then one of us comes back softer than before. Nobody keeps score. Nobody stores it away for later. There is no ledger of who was right. I have seen relationships built like courtrooms, always arguing, always defending. Ours is not that. Ours is two people who would rather lose an argument than lose each other. That is the only rule we have ever needed.",
+    "There were days I did not believe in myself. Days where everything I did felt small and late and not enough. And on those days you looked at me like I was something worth looking at, and it was almost offensive how much you believed in me. I wanted to argue with you. I wanted to tell you that you had the wrong idea about who I was. And then I realised that maybe you see something I cannot see yet. Maybe loving someone means holding the better version of them up until they can reach it. You have been doing that for fifteen months.",
+    "Neither of us chose this easily. Waiting is not romantic in the way people pretend it is. It is not longing looks and sad songs. It is patience on days when patience feels impossible. It is trusting something you cannot see or touch. It is going to sleep alone again and believe it is temporary. And somehow, doing that with you has never once felt like a sacrifice. It has felt like building. Every month that passes is another brick. We are not waiting for our life to start. We are already building it.",
+    "You know the version of me that nobody else does. The one that is small and scared and not very brave. The one that overthinks and gets quiet and pulls away when things get heavy. You have seen all of that. You have held all of that. And you did not flinch. Do you understand how rare that is. Most people love the version of you that shows up to good moments. You loved the version that shows up at random moments in the morning with nothing to offer except honesty. I will never be able to repay you for that.",
+    "We fell asleep on the phone if you remember. Neither of us planned it. It just happened, the way it always does. And somewhere in the middle of you breathing slower and your sentences getting shorter, I realised this is the closest thing to being next to you that I have right now. So I stayed. I listened to you sleep. I did not hang up. I do not know if you know that. I do not know if you have ever woken up and seen that the call is still going. It always is. I am always there.",
+    "When I picture our future, it is grand. It is big house or a big life and it's also It is a kitchen with two meals on the counter. It is you in my shirt, half asleep, complaining. It is me making food and you stealing it. It is ordinary. It is small. It is the most beautiful thing I can imagine. I do not need a spectacular life. I just need one where I get to see your face every morning and know that we made it. That is all I have ever wanted.",
+    "You are reading this right now, somewhere far away, and I want you to know that at this exact moment, someone is thinking about you with a kind of love that has no conditions attached. Not because you earned it today. because you were perfect. Just because you exist and you are you, and that has always been enough for me. Fifteen months in, I get butterflies everytimeI see youu. I am alwayssl loving youu more than yesterday . I am loving youu easily, the way I breathe. Thank youu mutuuu ❤️"
+];
+
+const palettes = [
+    { petal: '#ffb8d0', center: '#ffe066' },
+    { petal: '#ff95b8', center: '#ffd6a0' },
+    { petal: '#d8a8e8', center: '#ffe066' },
+    { petal: '#ffa898', center: '#ffe066' },
+    { petal: '#e8a8c8', center: '#ffd6a0' },
+    { petal: '#c8b0e8', center: '#ffe066' },
+    { petal: '#ffc0d4', center: '#ffd6a0' },
+    { petal: '#f0a8d8', center: '#ffe066' }
+];
+
+/* ============ BUILD SEED SECTIONS ============ */
+const seedsContainer = document.getElementById('seedsContainer');
+let plantedCount = 0;
+
+seedMessages.forEach((msg, index) => {
+    const section = document.createElement('div');
+    section.className = 'seed-section';
+    section.dataset.index = index;
+
+    const seedWrapper = document.createElement('div');
+    seedWrapper.className = 'seed-wrapper';
+    const seed = document.createElement('div');
+    seed.className = 'seed';
+    seedWrapper.appendChild(seed);
+    section.appendChild(seedWrapper);
+
+    const plantArea = document.createElement('div');
+    plantArea.className = 'plant-area';
+
+    const flowerContainer = document.createElement('div');
+    flowerContainer.className = 'flower-container';
+
+    const stem = document.createElement('div');
+    stem.className = 'stem';
+    flowerContainer.appendChild(stem);
+
+    const bloom = document.createElement('div');
+    bloom.className = 'bloom';
+    const palette = palettes[index % palettes.length];
+    
+    for (let i = 0; i < 6; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        const angle = (i / 6) * 360;
+        petal.style.transform = `rotate(${angle}deg) translateY(-14px)`;
+        petal.style.background = `radial-gradient(circle at 30% 30%, #fff 0%, ${palette.petal} 55%, ${palette.petal} 100%)`;
+        petal.style.boxShadow = `inset 0 -1px 3px rgba(0,0,0,0.08), 0 0 6px ${palette.petal}66`;
+        bloom.appendChild(petal);
+    }
+    const center = document.createElement('div');
+    center.className = 'bloom-center';
+    center.style.background = `radial-gradient(circle at 40% 40%, #fffbe8, ${palette.center})`;
+    bloom.appendChild(center);
+    
+    flowerContainer.appendChild(bloom);
+    plantArea.appendChild(flowerContainer);
+
+    const text = document.createElement('div');
+    text.className = 'message-text';
+    text.textContent = msg;
+    plantArea.appendChild(text);
+
+    section.appendChild(plantArea);
+
+    seedWrapper.addEventListener('click', () => {
+        if (!section.classList.contains('planted')) {
+            section.classList.add('planted');
+            createBurst(seedWrapper);
+            
+            plantedCount++;
+            if (plantedCount === 15) {
+                setTimeout(triggerFinale, 1500);
+            }
+
+            setTimeout(() => {
+                const yOffset = -100; 
+                const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+            }, 600);
+        }
+    });
+
+    seedsContainer.appendChild(section);
+});
+
+/* ============ BUILD THE FINALE GARDEN (15 FLOWERS) ============ */
+const finaleGarden = document.getElementById('finaleGarden');
+for (let i = 0; i < 15; i++) {
+    const f = document.createElement('div');
+    f.className = 'finale-flower';
+    const bloom = document.createElement('div');
+    bloom.className = 'bloom';
+    const palette = palettes[i % palettes.length];
+    
+    for (let j = 0; j < 6; j++) {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        const angle = (j / 6) * 360;
+        petal.style.transform = `rotate(${angle}deg) translateY(-14px)`;
+        petal.style.background = `radial-gradient(circle at 30% 30%, #fff 0%, ${palette.petal} 55%, ${palette.petal} 100%)`;
+        petal.style.boxShadow = `inset 0 -1px 3px rgba(0,0,0,0.08), 0 0 6px ${palette.petal}66`;
+        bloom.appendChild(petal);
+    }
+    const center = document.createElement('div');
+    center.className = 'bloom-center';
+    center.style.background = `radial-gradient(circle at 40% 40%, #fffbe8, ${palette.center})`;
+    bloom.appendChild(center);
+    
+    f.appendChild(bloom);
+    finaleGarden.appendChild(f);
+}
+
+/* ============ FINALE SEQUENCE ============ */
+function triggerFinale() {
+    // Change sky to dawn
+    document.getElementById('skyDawn').style.opacity = 1;
+    starsLayer.style.opacity = 0;
+    
+    // Show fireflies
+    firefliesContainer.classList.add('active');
+    spawnFireflies(30);
+    
+    // Show the finale section
+    document.getElementById('finaleSection').classList.add('show');
+    
+    // Scroll to the finale smoothly
+    setTimeout(() => {
+        document.getElementById('finaleSection').scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+}
+
+/* ============ MOON INTERACTION ============ */
+function dimMoon() {
+    document.getElementById('moonContainer').classList.add('dimmed');
+}
+
+/* ============ LIGHT BURST ============ */
+function createBurst(container) {
+    const burst = document.createElement('div');
+    burst.style.cssText = `
+        position: absolute;
+        top: 8px; left: 50%;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #fff, rgba(255,200,220,0.8), transparent);
+        box-shadow: 0 0 30px rgba(255,220,240,1), 0 0 60px rgba(255,150,200,0.6);
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        animation: burstAnim 1s ease-out forwards;
+    `;
+    if (!document.getElementById('burstStyle')) {
+        const style = document.createElement('style');
+        style.id = 'burstStyle';
+        style.textContent = `
+            @keyframes burstAnim {
+                0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    container.appendChild(burst);
+    setTimeout(() => burst.remove(), 1100);
+}
+
+/* ============ SCROLL MORPHING (NATURAL) ============ */
+const skyDawn = document.getElementById('skyDawn');
+
+window.addEventListener('scroll', () => {
+    // If the finale is already triggered, don't override the sky
+    if (document.getElementById('finaleSection').classList.contains('show')) return;
+
+    const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const pct = Math.max(0, Math.min(1, scrollY / maxScroll));
+
+    // Gradual transition as she scrolls
+    if (pct > 0.5) {
+        skyDawn.style.opacity = (pct - 0.5) * 2;
+        starsLayer.style.opacity = Math.max(0, 1 - (pct - 0.5) * 3);
+    }
+});
+
+/* ============ PETAL TRAIL ============ */
+let lastPetalTime = 0;
+const petalColors = ['#ffb8d0', '#ff95b8', '#ffc8dc', '#e8a8c8', '#d8a8e8'];
+
+function createPetal(x, y) {
+    const now = performance.now();
+    if (now - lastPetalTime < 40) return;
+    lastPetalTime = now;
+
+    const p = document.createElement('div');
+    p.className = 'falling-petal';
+    const size = Math.random() * 6 + 6;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.background = `radial-gradient(circle at 30% 30%, #fff, ${petalColors[Math.floor(Math.random() * petalColors.length)]})`;
+    p.style.boxShadow = '0 0 8px rgba(255,180,210,0.6)';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 2000);
+}
+
+document.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    if (t) createPetal(t.clientX, t.clientY);
+}, { passive: true });
+
+document.addEventListener('mousemove', (e) => {
+    createPetal(e.clientX, e.clientY);
+});
+</script>
+</body>
+</html>
